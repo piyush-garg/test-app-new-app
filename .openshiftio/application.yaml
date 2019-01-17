@@ -1,165 +1,130 @@
+warning: Cannot check if git requires authentication.
 apiVersion: v1
-kind: Template
-metadata:
-  name: launchpad-builder
-  annotations:
-    description: This template creates a Build Configuration using an S2I builder.
-    tags: instant-app
-parameters:
-  - name: SUFFIX_NAME
-    description: The suffix name for the template objects
-    displayName: Suffix name
-    value: ''
-  - name: RELEASE_VERSION
-    description: The release version number of application
-    displayName: Release version
-    value: 2.0.2
-  - name: SOURCE_REPOSITORY_URL
-    description: The source URL for the application
-    displayName: Source URL
-    required: true
-  - name: SOURCE_REPOSITORY_REF
-    description: The branch name for the application
-    displayName: Source Branch
-    value: master
-    required: true
-  - name: GITHUB_WEBHOOK_SECRET
-    description: A secret string used to configure the GitHub webhook.
-    displayName: GitHub Webhook Secret
-    required: true
-    from: '[a-zA-Z0-9]{40}'
-    generate: expression
-objects:
-  - apiVersion: image.openshift.io/v1
-    kind: ImageStream
-    metadata:
-      name: 'nodejs-health-check${SUFFIX_NAME}'
-      labels:
-        version: '${RELEASE_VERSION}'
-    spec: {}
-  - apiVersion: v1
-    kind: BuildConfig
-    metadata:
-      name: 'nodejs-health-check-s2i${SUFFIX_NAME}'
-      labels:
-        version: '${RELEASE_VERSION}'
-    spec:
-      output:
-        to:
-          kind: ImageStreamTag
-          name: 'nodejs-health-check${SUFFIX_NAME}:${RELEASE_VERSION}'
-      postCommit: {}
-      resources: {}
-      source:
-        git:
-          uri: '${SOURCE_REPOSITORY_URL}'
-          ref: '${SOURCE_REPOSITORY_REF}'
-        type: Git
-      strategy:
-        type: Source
-        sourceStrategy:
-          from:
-            kind: DockerImage
-            name: 'nodeshift/centos7-s2i-nodejs:10.x'
-          incremental: true
-      triggers:
-        - github:
-            secret: '${GITHUB_WEBHOOK_SECRET}'
-          type: GitHub
-        - type: ConfigChange
-    status:
-      lastVersion: 0
-  - apiVersion: v1
-    kind: Service
-    spec:
-      ports:
-        - protocol: TCP
-          port: 8080
-          targetPort: 8080
-      type: ClusterIP
-      selector:
-        project: nodejs-health-check
-        provider: nodeshift
-    metadata:
-      name: 'nodejs-health-check${SUFFIX_NAME}'
-      labels:
-        provider: nodeshift
-        expose: 'true'
-        project: nodejs-health-check
-        version: '${RELEASE_VERSION}'
-  - apiVersion: v1
-    kind: DeploymentConfig
-    metadata:
-      name: 'nodejs-health-check${SUFFIX_NAME}'
-      labels:
-        app: nodejs-health-check
-        provider: nodeshift
-        project: nodejs-health-check
-        version: '${RELEASE_VERSION}'
-    spec:
-      template:
-        spec:
-          containers:
-            - readinessProbe:
-                httpGet:
-                  path: /api/health/readiness
-                  port: 8080
-                  scheme: HTTP
-                failureThreshold: 3
-                initialDelaySeconds: 10
-                periodSeconds: 5
-                successThreshold: 1
-                timeoutSeconds: 1
-              livenessProbe:
-                httpGet:
-                  path: /api/health/liveness
-                  port: 8080
-                  scheme: HTTP
-                failureThreshold: 2
-                initialDelaySeconds: 60
-                periodSeconds: 3
-                successThreshold: 1
-                timeoutSeconds: 1
-              image: ''
-              name: nodejs-health-check
-              securityContext:
-                privileged: false
-              ports:
-                - containerPort: 8080
-                  name: http
-                  protocol: TCP
-        metadata:
-          labels:
-            app: nodejs-health-check
-            project: nodejs-health-check
-            provider: nodeshift
-            version: '${RELEASE_VERSION}'
-      replicas: 1
-      selector:
-        app: nodejs-health-check
-        project: nodejs-health-check
-        provider: nodeshift
-      triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-              - nodejs-health-check
-            from:
-              kind: ImageStreamTag
-              name: 'nodejs-health-check${SUFFIX_NAME}:${RELEASE_VERSION}'
-  - apiVersion: v1
-    kind: Route
-    metadata:
-      labels:
-        project: nodejs-health-check
-        provider: nodeshift
-        version: '${RELEASE_VERSION}'
-      name: 'nodejs-health-check${SUFFIX_NAME}'
-    spec:
-      port:
-        targetPort: 8080
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: test-app-new-app
+    name: test-app-new-app
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: test-app-new-app
+    name: test-app-new-app
+  spec:
+    nodeSelector: null
+    output:
       to:
-        kind: Service
-        name: 'nodejs-health-check${SUFFIX_NAME}'
+        kind: ImageStreamTag
+        name: test-app-new-app:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        ref: master
+        uri: git@github.com:piyush-garg/test-app-new-app.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: nodejs:10
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: pC13T4lOYmV7ztN-6RoX
+      type: GitHub
+    - generic:
+        secret: D1AHyYPRl4nVu8k47-54
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: test-app-new-app
+    name: test-app-new-app
+  spec:
+    replicas: 1
+    selector:
+      app: test-app-new-app
+      deploymentconfig: test-app-new-app
+    strategy:
+      resources: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: test-app-new-app
+          deploymentconfig: test-app-new-app
+      spec:
+        containers:
+        - image: test-app-new-app:latest
+          name: test-app-new-app
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - test-app-new-app
+        from:
+          kind: ImageStreamTag
+          name: test-app-new-app:latest
+      type: ImageChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: test-app-new-app
+    name: test-app-new-app
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: test-app-new-app
+      deploymentconfig: test-app-new-app
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}

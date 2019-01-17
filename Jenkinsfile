@@ -16,9 +16,7 @@ osio {
 
   cd {
 
-    def resources = processTemplate(params: [
-          release_version: "1.0.${env.BUILD_NUMBER}"
-    ])
+    def resources = loadResources(file: ".openshiftio/application.yaml")
 
     build resources: resources
 
