@@ -16,7 +16,7 @@ osio {
 
   cd {
 
-    def resources = loadResources(file: ".openshiftio/application.yaml")
+    def resources = loadResources(file: ".openshiftio/application.yaml", validate: false)
 
     build resources: resources
 
