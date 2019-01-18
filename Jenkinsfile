@@ -16,11 +16,9 @@ osio {
 
   cd {
     
-    sh {
-      rm -rf .openshiftio
+    sh "rm -rf .openshiftio"
 
-      mkdir -p .openshiftio
-    }  
+    sh "mkdir -p .openshiftio"
     
     sh "oc new-app . -o yaml --strategy=source --dry-run=true > .openshiftio/application.yaml"
 
