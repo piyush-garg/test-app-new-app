@@ -22,6 +22,8 @@ osio {
     
     sh "oc new-app . -o yaml --strategy=source --dry-run=true > .openshiftio/application.yaml"
 
+    sh "cat .openshiftio/application.yaml"
+
     def resources = loadResources(file: ".openshiftio/application.yaml", validate: false)
 
     build resources: resources
