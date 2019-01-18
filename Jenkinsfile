@@ -20,9 +20,9 @@ osio {
       rm -rf .openshiftio
 
       mkdir -p .openshiftio
-
-      oc new-app . -o yaml --strategy=source --dry-run=true > .openshiftio/application.yaml
     }  
+    
+    sh "oc new-app . -o yaml --strategy=source --dry-run=true > .openshiftio/application.yaml"
 
     def resources = loadResources(file: ".openshiftio/application.yaml", validate: false)
 
