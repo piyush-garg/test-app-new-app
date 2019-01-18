@@ -16,6 +16,8 @@ osio {
 
   cd {
     
+    sh "oc version"
+    
     sh "rm -rf .openshiftio"
 
     sh "mkdir -p .openshiftio"
